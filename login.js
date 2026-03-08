@@ -1,6 +1,6 @@
 const AUTH_KEY = 'zombie-api-auth-v1';
 const DEMO_USER = 'admin';
-const DEMO_PASS = 'Admin@123';
+const DEMO_PASS = 'Admin123';
 
 const loginForm = document.getElementById('loginForm');
 const messageEl = document.getElementById('loginMessage');
@@ -49,3 +49,4 @@ loginForm.addEventListener('submit', (event) => {
     window.location.href = 'index.html';
   }, 500);
 });
+
