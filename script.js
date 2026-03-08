@@ -1,8 +1,16 @@
+const AUTH_KEY = 'zombie-api-auth-v1';
+
+
+if (!localStorage.getItem(AUTH_KEY)) {
+  window.location.replace('login.html');
+}
+
 const STORAGE_KEY = 'zombie-api-inventory-v1';
 const filters = document.querySelectorAll('.chip');
 const tableBody = document.getElementById('apiTableBody');
 const scanBtn = document.getElementById('scanBtn');
 const simulateBtn = document.getElementById('simulateBtn');
+const logoutBtn = document.getElementById('logoutBtn');
 const alertPanel = document.getElementById('alertPanel');
 const analyzerForm = document.getElementById('analyzerForm');
 const lastScan = document.getElementById('lastScan');
@@ -314,6 +322,11 @@ simulateBtn.addEventListener('click', () => {
   pushAlert('danger', 'HIGH: Undocumented endpoint <strong>/api/test/internal-stats</strong> detected from network telemetry.', false);
 });
 
+logoutBtn.addEventListener('click', () => {
+  localStorage.removeItem(AUTH_KEY);
+  window.location.replace('login.html');
+});
+
 tableBody.addEventListener('click', (event) => {
   const target = event.target;
   if (!(target instanceof HTMLElement)) {
@@ -345,50 +358,3 @@ hydrateFromStorage();
 refreshMetrics();
 applyCurrentFilter();
 updateLastScanLabel();
-
-filters.forEach((button) => {
-  button.addEventListener('click', () => {
-    filters.forEach((chip) => chip.classList.remove('active'));
-    button.classList.add('active');
-
-    const filter = button.dataset.filter;
-    rows.forEach((row) => {
-      const status = row.dataset.status;
-      const risk = row.dataset.risk;
-
-      const showAll = filter === 'all';
-      const showZombie = filter === 'zombie' && status === 'zombie';
-      const showHigh = filter === 'high' && risk === 'high';
-
-      row.style.display = showAll || showZombie || showHigh ? '' : 'none';
-    });
-  });
-});
-
-scanBtn.addEventListener('click', () => {
-  scanBtn.disabled = true;
-  scanBtn.textContent = 'Scanning...';
-
-  setTimeout(() => {
-    const totalApis = document.getElementById('totalApis');
-    totalApis.textContent = Number(totalApis.textContent) + 1;
-
-    const orphanApis = document.getElementById('orphanApis');
-    orphanApis.textContent = Number(orphanApis.textContent) + 1;
-
-    const infoAlert = document.createElement('div');
-    infoAlert.className = 'alert info';
-    infoAlert.innerHTML = 'INFO: New endpoint found <strong>/api/reports/legacy</strong> and classified as orphan';
-    alertPanel.appendChild(infoAlert);
-
-    scanBtn.textContent = 'Run Discovery Scan';
-    scanBtn.disabled = false;
-  }, 1200);
-});
-
-simulateBtn.addEventListener('click', () => {
-  const highAlert = document.createElement('div');
-  highAlert.className = 'alert danger';
-  highAlert.innerHTML = 'HIGH: Undocumented endpoint <strong>/api/test/internal-stats</strong> detected from network scan';
-  alertPanel.prepend(highAlert);
-});

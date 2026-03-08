@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zombie API Hunter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <main class="login-page">
+        <section class="login-form" aria-labelledby="loginTitle">
+            <p class="eyebrow">Security Operations</p>
+            <div class="login-logo-wrap" aria-hidden="true">
+                <img class="login-logo" src="https://static.vecteezy.com/system/resources/thumbnails/025/463/773/small/hacker-logo-design-a-mysterious-and-dangerous-hacker-illustration-vector.jpg" alt="Hacker logo" />
+            </div>
+            <h1 id="loginTitle">Sign in</h1>
+            <p class="subtitle">Access Zombie API Hunter dashboard</p>
+
+            <form id="loginForm" class="auth-form" novalidate>
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" autocomplete="username" required />
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required />
+                </div>
+                <p id="loginMessage" class="login-message" role="status" aria-live="polite"></p>
+                <button type="submit" class="btn btn-primary login-btn">Login</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="login.js"></script>
+</body>
+</html>
