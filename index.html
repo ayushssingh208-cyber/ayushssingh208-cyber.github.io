@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zombie API Hunter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Security Operations</p>
+      <h1>Zombie API Hunter</h1>
+      <p class="subtitle">Continuous Discovery, Classification, and Defense for Stale/Defunct APIs</p>
+      <p class="subtle" id="lastScan">Last scan: just now</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-secondary" id="simulateBtn">Simulate Alert</button>
+      <button class="btn btn-primary" id="scanBtn">Run Discovery Scan</button>
+    </div>
+  </header>
+
+  <main class="dashboard">
+    <section class="cards" aria-label="Key stats">
+      <article class="card">
+        <p class="card-title">Total APIs</p>
+        <p class="card-value" id="totalApis">0</p>
+      </article>
+      <article class="card active">
+        <p class="card-title">Active</p>
+        <p class="card-value" id="activeApis">0</p>
+      </article>
+      <article class="card deprecated">
+        <p class="card-title">Deprecated</p>
+        <p class="card-value" id="deprecatedApis">0</p>
+      </article>
+      <article class="card orphan">
+        <p class="card-title">Orphan</p>
+        <p class="card-value" id="orphanApis">0</p>
+      </article>
+      <article class="card zombie">
+        <p class="card-title">Zombie</p>
+        <p class="card-value" id="zombieApis">0</p>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Analyzer Console</h2>
+        <span class="panel-note">Classifies endpoint status and risk in real time</span>
+      </div>
+      <form id="analyzerForm" class="analyzer-form">
+        <input type="text" id="endpointInput" placeholder="/api/new-endpoint" required />
+        <select id="sourceInput" required>
+          <option value="network">Network Scanner</option>
+          <option value="gateway">API Gateway</option>
+          <option value="repo">Code Repository</option>
+          <option value="runtime">Runtime Monitor</option>
+        </select>
+        <input type="number" id="callsInput" min="0" placeholder="Calls (last 30d)" required />
+        <select id="authInput" required>
+          <option value="jwt">Auth: JWT</option>
+          <option value="token">Auth: Token</option>
+          <option value="none">Auth: None</option>
+        </select>
+        <select id="encryptionInput" required>
+          <option value="https">Encryption: HTTPS</option>
+          <option value="http">Encryption: HTTP</option>
+        </select>
+        <select id="rateLimitInput" required>
+          <option value="enabled">Rate Limit: Enabled</option>
+          <option value="partial">Rate Limit: Partial</option>
+          <option value="missing">Rate Limit: Missing</option>
+        </select>
+        <label><input type="checkbox" id="documentedInput" checked /> Documented</label>
+        <label><input type="checkbox" id="deprecatedInput" /> Deprecated Flag</label>
+        <button type="submit" class="btn btn-primary">Analyze & Add</button>
+      </form>
+    </section>
+
+    <section class="panel inventory">
+      <div class="panel-header">
+        <h2>API Inventory</h2>
+        <div class="filters">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="zombie">Zombie</button>
+          <button class="chip" data-filter="high">High Risk</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Endpoint</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>Risk</th>
+              <th>Auth</th>
+              <th>Encryption</th>
+              <th>Rate Limit</th>
+              <th>Recommended Action</th>
+              <th>Ops</th>
+            </tr>
+          </thead>
+          <tbody id="apiTableBody">
+            <tr data-source="gateway" data-status="active" data-risk="low" data-documentation="true" data-calls="1200" data-deprecated="false">
+              <td>/api/login</td>
+              <td>API Gateway</td>
+              <td><span class="badge status-active">Active</span></td>
+              <td><span class="badge risk-low">Low</span></td>
+              <td>JWT</td>
+              <td>HTTPS</td>
+              <td>Enabled</td>
+              <td>Monitor</td>
+              <td><button class="inline-btn" data-op="audit">Audit</button></td>
+            </tr>
+            <tr data-source="repo" data-status="deprecated" data-risk="medium" data-documentation="true" data-calls="56" data-deprecated="true">
+              <td>/api/v1/transfer</td>
+              <td>Code Repository</td>
+              <td><span class="badge status-deprecated">Deprecated</span></td>
+              <td><span class="badge risk-medium">Medium</span></td>
+              <td>Token</td>
+              <td>HTTPS</td>
+              <td>Partial</td>
+              <td>Plan retirement in 30 days</td>
+              <td><button class="inline-btn" data-op="audit">Audit</button></td>
+            </tr>
+            <tr data-source="runtime" data-status="orphan" data-risk="medium" data-documentation="false" data-calls="0" data-deprecated="false">
+              <td>/api/reporting/temp</td>
+              <td>Runtime Monitor</td>
+              <td><span class="badge status-orphan">Orphan</span></td>
+              <td><span class="badge risk-medium">Medium</span></td>
+              <td>None</td>
+              <td>HTTPS</td>
+              <td>Missing</td>
+              <td>Confirm ownership + disable</td>
+              <td><button class="inline-btn warn" data-op="queue-disable">Queue Disable</button></td>
+            </tr>
+            <tr data-source="network" data-status="zombie" data-risk="high" data-documentation="false" data-calls="0" data-deprecated="false">
+              <td>/api/v1/old-payment</td>
+              <td>Network Scanner</td>
+              <td><span class="badge status-zombie">Zombie</span></td>
+              <td><span class="badge risk-high">High</span></td>
+              <td>None</td>
+              <td>HTTP</td>
+              <td>Missing</td>
+              <td>Immediate block on gateway</td>
+              <td><button class="inline-btn warn" data-op="queue-disable">Queue Disable</button></td>
+            </tr>
+            <tr data-source="network" data-status="zombie" data-risk="high" data-documentation="false" data-calls="0" data-deprecated="false">
+              <td>/api/internal/debug/users</td>
+              <td>Network Scanner</td>
+              <td><span class="badge status-zombie">Zombie</span></td>
+              <td><span class="badge risk-high">High</span></td>
+              <td>None</td>
+              <td>HTTP</td>
+              <td>Missing</td>
+              <td>Decommission workflow</td>
+              <td><button class="inline-btn warn" data-op="queue-disable">Queue Disable</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <article class="panel">
+        <h2>Risk Distribution</h2>
+        <div class="bars">
+          <div class="bar-row">
+            <span>High</span>
+            <div class="bar"><div class="fill high" id="highRiskFill" style="width: 0%"></div></div>
+            <strong id="highRiskPct">0%</strong>
+          </div>
+          <div class="bar-row">
+            <span>Medium</span>
+            <div class="bar"><div class="fill medium" id="mediumRiskFill" style="width: 0%"></div></div>
+            <strong id="mediumRiskPct">0%</strong>
+          </div>
+          <div class="bar-row">
+            <span>Low</span>
+            <div class="bar"><div class="fill low" id="lowRiskFill" style="width: 0%"></div></div>
+            <strong id="lowRiskPct">0%</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>Discovery Sources</h2>
+        <ul class="source-list">
+          <li><span>Network Scanner (Nmap/ZAP)</span><strong id="sourceNetwork">0 APIs</strong></li>
+          <li><span>API Gateway Sync</span><strong id="sourceGateway">0 APIs</strong></li>
+          <li><span>Code Repository Parser</span><strong id="sourceRepo">0 APIs</strong></li>
+          <li><span>Runtime Traffic Monitor</span><strong id="sourceRuntime">0 APIs</strong></li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="grid-2">
+      <article class="panel">
+        <h2>Zombie API Decommission Workflow</h2>
+        <ol class="workflow">
+          <li>Detect zombie candidate from scans + logs</li>
+          <li>Validate owner/service dependency</li>
+          <li>Create remediation ticket automatically</li>
+          <li>Approve assisted disable on API gateway</li>
+          <li>Archive metadata and close</li>
+        </ol>
+      </article>
+
+      <article class="panel alerts" id="alertPanel">
+        <h2>Live Alerts</h2>
+        <div class="alert danger">HIGH: Zombie endpoint <strong>/api/internal/debug/users</strong> exposed without auth</div>
+        <div class="alert warning">MEDIUM: Deprecated API <strong>/api/v1/transfer</strong> still receiving traffic</div>
+        <div class="alert info">INFO: Last full scan completed 8 minutes ago</div>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <p>Operational visibility dashboard • API inventory updates in real time</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
